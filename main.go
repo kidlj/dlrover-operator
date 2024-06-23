@@ -54,6 +54,7 @@ func main() {
 	var enableLeaderElection bool
 	var probeAddr string
 	var masterImage string
+	var masterImagePullSecret string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
@@ -61,6 +62,8 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&masterImage, "master-image", "registry.cn-hangzhou.aliyuncs.com/intell-ai/dlrover:latest",
 		"The image to launch a dlrover master Pod of an ElasticJob.")
+	flag.StringVar(&masterImagePullSecret, "master-image-pull-secret", "image-pull-secret",
+		"The image to pull the dlrover master image.")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -93,7 +96,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = controllers.NewElasticJobReconciler(mgr, masterImage).SetupWithManager(mgr); err != nil {
+	if err = controllers.NewElasticJobReconciler(mgr, masterImage, masterImagePullSecret).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ElasticJob")
 		os.Exit(1)
 	}

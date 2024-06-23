@@ -34,10 +34,11 @@ func TestCreateMasterPod(t *testing.T) {
 		},
 	}
 	job.Spec.ReplicaSpecs = make(map[commonv1.ReplicaType]*elasticv1alpha1.ReplicaSpec)
-	NewMasterTemplateToJob(job, "dlrover-master:test")
+	NewMasterTemplateToJob(job, "dlrover-master:test", "image-pull-secret")
 	manager := &Manager{}
 	pod := manager.newJobMaster(job, initMasterIndex)
 	assert.Equal(t, pod.Name, "elasticjob-test-ps-dlrover-master")
+	assert.Equal(t, pod.Spec.ImagePullSecrets[0].Name, "image-pull-secret")
 	assert.Equal(t, pod.Spec.Containers[0].Image, "dlrover-master:test")
 	assert.Equal(t, string(pod.Spec.Containers[0].ImagePullPolicy), "Always")
 	assert.True(t, strings.Contains(pod.Spec.Containers[0].Command[2], "--namespace dlrover"))
@@ -66,15 +67,21 @@ func TestCreateMasterPodWithImage(t *testing.T) {
 				Spec: corev1.PodSpec{
 					Containers:    []corev1.Container{container},
 					RestartPolicy: corev1.RestartPolicyNever,
+					ImagePullSecrets: []corev1.LocalObjectReference{
+						{
+							Name: "image-pull-secret",
+						},
+					},
 				},
 			},
 		},
 	}
 
-	NewMasterTemplateToJob(job, "dlrover-master:test")
+	NewMasterTemplateToJob(job, "dlrover-master:test", "")
 	manager := &Manager{}
 	pod := manager.newJobMaster(job, initMasterIndex)
 	assert.Equal(t, pod.Name, "elasticjob-test-ps-dlrover-master")
+	assert.Equal(t, pod.Spec.ImagePullSecrets[0].Name, "image-pull-secret")
 	assert.Equal(t, pod.Spec.Containers[0].Image, "dlrover-master:test-v0")
 	assert.Equal(t, string(pod.Spec.Containers[0].ImagePullPolicy), "Always")
 }

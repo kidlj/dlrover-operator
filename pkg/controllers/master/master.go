@@ -229,7 +229,7 @@ func (m *Manager) StopRunningPods(
 }
 
 // NewMasterTemplateToJob sets configurations to the master template of a job.
-func NewMasterTemplateToJob(job *elasticv1alpha1.ElasticJob, masterImage string) {
+func NewMasterTemplateToJob(job *elasticv1alpha1.ElasticJob, masterImage, masterImagePullSecret string) {
 	command := masterCommand + fmt.Sprintf(
 		" --platform pyk8s --namespace %s --job_name %s --port %d",
 		job.Namespace, job.Name, masterServicePort,
@@ -256,10 +256,19 @@ func NewMasterTemplateToJob(job *elasticv1alpha1.ElasticJob, masterImage string)
 		Spec: corev1.PodSpec{
 			Containers:    []corev1.Container{container},
 			RestartPolicy: corev1.RestartPolicyNever,
+			ImagePullSecrets: []corev1.LocalObjectReference{
+				{
+					Name: masterImagePullSecret,
+				},
+			},
 		},
 	}
-	if _, ok := job.Spec.ReplicaSpecs[ReplicaTypeJobMaster]; ok {
-		mainContainer := job.Spec.ReplicaSpecs[ReplicaTypeJobMaster].ReplicaSpec.Template.Spec.Containers[0]
+	if replica, ok := job.Spec.ReplicaSpecs[ReplicaTypeJobMaster]; ok {
+		podSpec := replica.ReplicaSpec.Template.Spec
+		if podSpec.ImagePullSecrets != nil {
+			podTemplate.Spec.ImagePullSecrets = podSpec.ImagePullSecrets
+		}
+		mainContainer := podSpec.Containers[0]
 		if mainContainer.Image != "" {
 			podTemplate.Spec.Containers[0].Image = mainContainer.Image
 		}
