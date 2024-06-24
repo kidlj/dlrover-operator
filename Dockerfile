@@ -1,7 +1,7 @@
 # Build the manager binary
 FROM ccr-24oe139y-pub.cnc.bj.baidubce.com/public/golang:1.22.4 as builder
 
-WORKDIR /workspace
+WORKDIR /
 
 ENV GOPROXY=https://goproxy.cn,direct
 
@@ -27,4 +27,4 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go
 # COPY --from=builder /workspace/manager .
 # USER 65532:65532
 
-ENTRYPOINT ["/workspace/manager"]
+ENTRYPOINT ["/manager"]
