@@ -12,5 +12,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: controller
-  newName: ccr-24oe139y-pub.cnc.bj.baidubce.com/cybertron/dlrover-controller
-  newTag: prod-20240624
+  newName: pcr.hs1.paratera.com/cybertron/cybertron/dlrover-controller
+  newTag: v0.3.7-mb-1

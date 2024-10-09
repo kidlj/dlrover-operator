@@ -46,22 +46,20 @@ const (
 // ElasticJobReconciler reconciles a ElasticJob object
 type ElasticJobReconciler struct {
 	client.Client
-	Scheme                *runtime.Scheme
-	Recorder              record.EventRecorder
-	Log                   logr.Logger
-	masterImage           string
-	masterImagePullSecret string
+	Scheme      *runtime.Scheme
+	Recorder    record.EventRecorder
+	Log         logr.Logger
+	masterImage string
 }
 
 // NewElasticJobReconciler creates a JobReconciler
-func NewElasticJobReconciler(mgr ctrl.Manager, masterImage, masterImagePullSecret string) *ElasticJobReconciler {
+func NewElasticJobReconciler(mgr ctrl.Manager, masterImage string) *ElasticJobReconciler {
 	r := &ElasticJobReconciler{
-		Client:                mgr.GetClient(),
-		Scheme:                mgr.GetScheme(),
-		Recorder:              mgr.GetEventRecorderFor("elasticjob-controller"),
-		Log:                   ctrl.Log.WithName("controllers").WithName("ElasticJob"),
-		masterImage:           masterImage,
-		masterImagePullSecret: masterImagePullSecret,
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		Recorder:    mgr.GetEventRecorderFor("elasticjob-controller"),
+		Log:         ctrl.Log.WithName("controllers").WithName("ElasticJob"),
+		masterImage: masterImage,
 	}
 	return r
 }
@@ -182,7 +180,7 @@ func (r *ElasticJobReconciler) stopRunningPods(job *elasticv1alpha1.ElasticJob) 
 }
 
 func (r *ElasticJobReconciler) createEasydlMaster(job *elasticv1alpha1.ElasticJob) error {
-	master.NewMasterTemplateToJob(job, r.masterImage, r.masterImagePullSecret)
+	master.NewMasterTemplateToJob(job, r.masterImage)
 	masterManager := common.ReplicaManagers[master.ReplicaTypeJobMaster]
 	err := masterManager.ReconcilePods(r.Client, job, nil)
 	if err != nil {
@@ -253,7 +251,7 @@ func (r *ElasticJobReconciler) updateScalePlanScaling(scalePlan *elasticv1alpha1
 func (r *ElasticJobReconciler) handleFaultPods(job *elasticv1alpha1.ElasticJob) {
 	for replicaType, manager := range common.ReplicaManagers {
 		if replicaType == master.ReplicaTypeJobMaster {
-			master.NewMasterTemplateToJob(job, r.masterImage, r.masterImagePullSecret)
+			master.NewMasterTemplateToJob(job, r.masterImage)
 		}
 		manager.HandleFaultPods(r.Client, job)
 	}

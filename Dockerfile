@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM ccr-24oe139y-pub.cnc.bj.baidubce.com/public/golang:1.22.4 as builder
+FROM modelbest-registry.cn-beijing.cr.aliyuncs.com/public/golang:1.22.4 as builder
 
 WORKDIR /
 

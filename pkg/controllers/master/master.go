@@ -229,7 +229,7 @@ func (m *Manager) StopRunningPods(
 }
 
 // NewMasterTemplateToJob sets configurations to the master template of a job.
-func NewMasterTemplateToJob(job *elasticv1alpha1.ElasticJob, masterImage, masterImagePullSecret string) {
+func NewMasterTemplateToJob(job *elasticv1alpha1.ElasticJob, masterImage string) {
 	command := masterCommand + fmt.Sprintf(
 		" --platform pyk8s --namespace %s --job_name %s --port %d",
 		job.Namespace, job.Name, masterServicePort,
@@ -256,11 +256,6 @@ func NewMasterTemplateToJob(job *elasticv1alpha1.ElasticJob, masterImage, master
 		Spec: corev1.PodSpec{
 			Containers:    []corev1.Container{container},
 			RestartPolicy: corev1.RestartPolicyNever,
-			ImagePullSecrets: []corev1.LocalObjectReference{
-				{
-					Name: masterImagePullSecret,
-				},
-			},
 		},
 	}
 	if replica, ok := job.Spec.ReplicaSpecs[ReplicaTypeJobMaster]; ok {
@@ -274,6 +269,15 @@ func NewMasterTemplateToJob(job *elasticv1alpha1.ElasticJob, masterImage, master
 		}
 		if mainContainer.ImagePullPolicy != "" {
 			podTemplate.Spec.Containers[0].ImagePullPolicy = mainContainer.ImagePullPolicy
+		}
+		if mainContainer.Command != nil {
+			podTemplate.Spec.Containers[0].Command = mainContainer.Command
+		}
+		if mainContainer.Resources.Requests != nil {
+			podTemplate.Spec.Containers[0].Resources.Requests = mainContainer.Resources.Requests
+		}
+		if mainContainer.Resources.Limits != nil {
+			podTemplate.Spec.Containers[0].Resources.Limits = mainContainer.Resources.Limits
 		}
 		if len(mainContainer.Env) > 0 {
 			podTemplate.Spec.Containers[0].Env = append(

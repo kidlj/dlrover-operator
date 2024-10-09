@@ -38,11 +38,8 @@ spec:
             - /manager
           args:
             - --leader-elect
-            - "--health-probe-bind-address=:8081"
-            - "--metrics-bind-address=127.0.0.1:8080"
-            - --master-image=ccr-24oe139y-vpc.cnc.bj.baidubce.com/xinference/dlrover:master
-            - --master-image-pull-secret=image-pull-secret
-          image: ccr-24oe139y-vpc.cnc.bj.baidubce.com/cybertron/dlrover-controller:prod-20240624
+            - --master-image=pcr.hs1.paratera.com/cybertron/cybertron/dlrover-master:v0.3.8
+          image: pcr.hs1.paratera.com/cybertron/cybertron/dlrover-controller:v0.3.7-mb-1
           name: manager
           securityContext:
             allowPrivilegeEscalation: false
